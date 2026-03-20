@@ -1,0 +1,54 @@
+/* Reset and base styles */
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Globe tooltip styles */
+.globe-tooltip {
+  background: rgba(15, 15, 20, 0.95);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: #f9fafb;
+  font-family: system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.globe-tooltip strong {
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.globe-tooltip span {
+  color: #9ca3af;
+}
+
+.globe-tooltip .status-running {
+  color: #22c55e;
+}
+
+.globe-tooltip .status-idle {
+  color: #eab308;
+}
+
+.globe-tooltip .status-paused {
+  color: #6b7280;
+}
+
+.globe-tooltip .status-error {
+  color: #ef4444;
+}

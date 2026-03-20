@@ -1,0 +1,423 @@
+/**
+ * HierarchyView Component Styles
+ * 2D Org Chart with dark theme
+ */
+
+.hierarchy-view {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.hierarchy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.hierarchy-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0;
+}
+
+.view-mode-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.view-mode-selector button {
+  padding: 10px 16px;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  background: #1f2937;
+  color: #9ca3af;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-mode-selector button:hover {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.view-mode-selector button.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.hierarchy-content {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.hierarchy-main {
+  flex: 1;
+  background: #1f2937;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Org Tree */
+.org-tree {
+  padding: 20px;
+}
+
+.tree-node {
+  position: relative;
+}
+
+.node-children {
+  margin-left: 40px;
+  padding-left: 20px;
+  border-left: 2px solid #374151;
+}
+
+.tree-node:not(:last-child) > .node-children::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 50%;
+  width: 20px;
+  border-top: 2px solid #374151;
+}
+
+.node-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #111827;
+  border-radius: 10px;
+  margin: 8px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--node-color, #6b7280);
+}
+
+.node-card:hover {
+  background: #1f2937;
+  transform: translateX(4px);
+}
+
+.node-card.selected {
+  background: #1f2937;
+  border-color: var(--node-color, #6b7280);
+  box-shadow: 0 0 0 2px var(--node-color, #6b7280);
+}
+
+.expand-icon {
+  font-size: 10px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.node-status {
+  font-size: 14px;
+}
+
+.node-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-name {
+  font-weight: 600;
+  color: #f9fafb;
+  font-size: 14px;
+}
+
+.node-title {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.child-count {
+  background: #374151;
+  color: #9ca3af;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+/* Task Flow */
+.task-flow h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0 0 20px 0;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-card {
+  background: #111827;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.task-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0;
+}
+
+.task-progress {
+  font-size: 14px;
+  font-weight: 600;
+  color: #22c55e;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #22c55e 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.task-stats {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* Revenue View */
+.revenue-view h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0 0 20px 0;
+}
+
+.revenue-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.revenue-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.revenue-label {
+  width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.revenue-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.revenue-bar-container {
+  flex: 1;
+  height: 24px;
+  background: #111827;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.revenue-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.revenue-value {
+  width: 140px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+.revenue-percent {
+  font-weight: 400;
+  color: #9ca3af;
+  margin-left: 4px;
+}
+
+.total-revenue {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 16px;
+  background: #111827;
+  border-radius: 10px;
+}
+
+.total-revenue span:first-child {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.total-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+/* Sidebar */
+.hierarchy-sidebar {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.legend, .node-details {
+  background: #1f2937;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.legend h3, .node-details h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0 0 12px 0;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #d1d5db;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #374151;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #f9fafb;
+  font-weight: 500;
+}
+
+.division-badge {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hierarchy-content {
+    flex-direction: column;
+  }
+
+  .hierarchy-sidebar {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .legend, .node-details {
+    flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .hierarchy-view {
+    padding: 16px;
+  }
+
+  .hierarchy-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .view-mode-selector {
+    width: 100%;
+  }
+
+  .view-mode-selector button {
+    flex: 1;
+    text-align: center;
+  }
+
+  .node-children {
+    margin-left: 20px;
+    padding-left: 10px;
+  }
+
+  .revenue-row {
+    flex-wrap: wrap;
+  }
+
+  .revenue-label {
+    width: 100%;
+  }
+
+  .revenue-bar-container {
+    width: 100%;
+    order: 2;
+  }
+
+  .revenue-value {
+    width: 100%;
+    text-align: left;
+    order: 3;
+    margin-top: 4px;
+  }
+}
