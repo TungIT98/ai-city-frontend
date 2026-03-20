@@ -168,6 +168,16 @@ class ApiService {
   async getCohortAnalysis() {
     return this.request('/analytics/cohorts');
   }
+
+  // Revenue by region for globe heatmap
+  async getRevenueByRegion() {
+    return this.request('/analytics/revenue/region');
+  }
+
+  // Customer locations for globe clustering
+  async getCustomerLocations() {
+    return this.request('/analytics/customers/locations');
+  }
 }
 
 // Paperclip API Service - Agent & Task visualization data
