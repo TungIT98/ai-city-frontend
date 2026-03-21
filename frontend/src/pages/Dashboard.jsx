@@ -10,8 +10,9 @@ import { Doughnut, Line } from 'react-chartjs-2';
 import api from '../services/api';
 import { useRealtime } from '../contexts/RealtimeContext';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { Settings, Activity } from 'lucide-react';
+import { Settings, Activity, Users, TrendingUp, Globe, FileText, Zap } from 'lucide-react';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -249,6 +250,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { liveMetrics, connectionStatus } = useRealtime();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [health, setHealth] = useState({});
@@ -304,6 +306,15 @@ const Dashboard = () => {
         api.getLeadAnalytics().catch(() => ({})),
         api.getAgents().catch(() => [])
       ]);
+
+      // Normalize backend data to expected Dashboard format (Phase 13)
+      // Backend /analytics/overview returns: { leads: { qualified: N, contacted: N, new: N } }
+      if (analyticsData?.leads && !analyticsData.leads.by_status) {
+        analyticsData.leads.by_status = Object.entries(analyticsData.leads).map(([status, count]) => ({
+          status: status,
+          count: count
+        }));
+      }
 
       setHealth(healthData);
       setAnalytics(analyticsData);
@@ -459,10 +470,10 @@ const Dashboard = () => {
     return <div className="error">{error}</div>;
   }
 
-  // Lead status distribution for doughnut chart
-  const leadsByStatus = leadAnalytics?.by_status || [];
-  const statusLabels = leadsByStatus.map(s => s.status);
-  const statusCounts = leadsByStatus.map(s => s.count);
+  // Lead status distribution for doughnut chart (from analytics/overview)
+  const leadsByStatus = analytics?.leads?.by_status || [];
+  const statusLabels = leadsByStatus.length ? leadsByStatus.map(s => s.status) : ['New', 'Contacted', 'Qualified'];
+  const statusCounts = leadsByStatus.length ? leadsByStatus.map(s => s.count) : [0, 0, 0];
 
   const doughnutData = {
     labels: statusLabels.length ? statusLabels : ['New', 'Contacted', 'Qualified', 'Converted'],
@@ -588,6 +599,67 @@ const Dashboard = () => {
             <Settings size={16} aria-hidden="true" />
             Customize
           </Link>
+        </div>
+      </div>
+
+      {/* Personalized Welcome + Quick Actions (Phase 13) */}
+      <div style={{
+        marginBottom: '24px',
+        background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #4facfe 100%)',
+        borderRadius: '16px',
+        padding: '24px 28px',
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '16px',
+        flexWrap: 'wrap'
+      }}>
+        <div>
+          <div style={{ fontSize: '13px', opacity: 0.85, marginBottom: '4px' }}>
+            {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 4px' }}>
+            Welcome back, {user?.name ? (user.name.split(' ')[0]) : 'there'}! 👋
+          </h2>
+          <p style={{ fontSize: '14px', opacity: 0.85, margin: 0 }}>
+            {user?.workspace?.name ? `${user.workspace.name} workspace · ` : ''}
+            Here's what's happening with AI City today.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {[
+            { icon: <Users size={16} />, label: 'Add Lead', path: '/leads', color: '#10b981' },
+            { icon: <Globe size={16} />, label: 'Globe View', path: '/globe', color: '#4facfe' },
+            { icon: <FileText size={16} />, label: 'New Report', path: '/report-builder', color: '#f59e0b' },
+            { icon: <Zap size={16} />, label: 'Automation', path: '/automation', color: '#8b5cf6' },
+            { icon: <TrendingUp size={16} />, label: 'Analytics', path: '/analytics', color: '#06b6d4' },
+          ].map((action, i) => (
+            <Link
+              key={i}
+              to={action.path}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                background: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                color: 'white',
+                fontSize: '13px',
+                fontWeight: 500,
+                backdropFilter: 'blur(8px)',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            >
+              <span style={{ color: action.color }}>{action.icon}</span>
+              {action.label}
+            </Link>
+          ))}
         </div>
       </div>
 
