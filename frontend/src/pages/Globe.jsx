@@ -121,6 +121,10 @@ function GlobePage() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (globeInstance.current) {
+        globeInstance.current._renderer.dispose && globeInstance.current._renderer.dispose();
+        globeInstance.current = null;
+      }
     };
   }, []);
 

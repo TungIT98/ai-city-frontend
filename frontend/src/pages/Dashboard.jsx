@@ -70,6 +70,10 @@ const Dashboard = () => {
     }
   };
 
+  // Build visitor trend labels and data from analytics
+  const visitorLabels = analytics?.visitor_trends?.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const visitorData = analytics?.visitor_trends?.data || [0, 0, 0, 0, 0, 0, 0];
+
   if (loading) {
     return (
       <div className="loading">
@@ -96,12 +100,12 @@ const Dashboard = () => {
     }]
   };
 
-  // Mock line chart data for visitors
+  // Real visitor trend data from API
   const lineData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    labels: visitorLabels,
     datasets: [{
       label: 'Visitors',
-      data: [120, 190, 150, 220, 180, 250, 280],
+      data: visitorData,
       borderColor: '#4facfe',
       backgroundColor: 'rgba(79, 172, 254, 0.1)',
       fill: true,

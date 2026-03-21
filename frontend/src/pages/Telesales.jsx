@@ -2,7 +2,7 @@
  * AI Telesales Dashboard
  * Product UI for AI Telesales: Lead management, call analytics, script editor, intent tracking
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import api from '../services/api';
 import './Telesales.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
@@ -100,9 +101,43 @@ function Telesales() {
   const [scripts, setScripts] = useState(sampleScripts);
   const [selectedScript, setSelectedScript] = useState(null);
   const [scriptContent, setScriptContent] = useState('');
+  const [realLeads, setRealLeads] = useState([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
 
-  // Mock leads data
-  const leads = [
+  // Fetch real leads from API
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        setLeadsLoading(true);
+        const data = await api.getLeads(null, 100);
+        // Transform API leads to expected format
+        const transformed = (data.leads || data || []).map((lead, idx) => ({
+          id: lead.id || idx + 1,
+          name: lead.name || lead.company || 'Unknown',
+          company: lead.company || lead.organization || '',
+          phone: lead.phone || lead.phone_number || lead.contact || '',
+          status: lead.status === 'qualified' ? 'hot' : lead.status === 'contacted' ? 'warm' : 'cold',
+          lastCall: lead.last_contact || lead.updated_at || '',
+          intent: lead.intent_level || lead.priority || 'medium'
+        }));
+        setRealLeads(transformed);
+      } catch (err) {
+        console.error('Failed to fetch leads:', err);
+        // Fall back to mock data on error
+        setRealLeads([
+          { id: 1, name: 'Nguyen Van A', company: 'TechCorp Vietnam', phone: '+84 912 345 678', status: 'hot', lastCall: '2026-03-20 10:30', intent: 'high' },
+          { id: 2, name: 'Tran Thi B', company: 'Smart Solutions', phone: '+84 987 654 321', status: 'warm', lastCall: '2026-03-19 14:15', intent: 'medium' },
+          { id: 3, name: 'Le Van C', company: 'Digital First', phone: '+84 933 111 222', status: 'cold', lastCall: '2026-03-18 09:45', intent: 'low' },
+        ]);
+      } finally {
+        setLeadsLoading(false);
+      }
+    };
+    fetchLeads();
+  }, []);
+
+  // Use real leads when available, mock otherwise
+  const leads = realLeads.length > 0 ? realLeads : [
     { id: 1, name: 'Nguyen Van A', company: 'TechCorp Vietnam', phone: '+84 912 345 678', status: 'hot', lastCall: '2026-03-20 10:30', intent: 'high' },
     { id: 2, name: 'Tran Thi B', company: 'Smart Solutions', phone: '+84 987 654 321', status: 'warm', lastCall: '2026-03-19 14:15', intent: 'medium' },
     { id: 3, name: 'Le Van C', company: 'Digital First', phone: '+84 933 111 222', status: 'cold', lastCall: '2026-03-18 09:45', intent: 'low' },
