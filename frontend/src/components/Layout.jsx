@@ -51,6 +51,7 @@ const Layout = ({ children }) => {
     { path: '/dashboard/customize', label: 'Customize', icon: '🎨' },
     { path: '/admin', label: 'Admin', icon: '🛡️' },
     { path: '/email-templates', label: 'Email Templates', icon: '📧' },
+    { path: '/payment', label: 'Subscribe', icon: '💳' },
   ];
 
   // Mobile bottom nav items
