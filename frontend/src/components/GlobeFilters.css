@@ -1,0 +1,77 @@
+.globe-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  background: rgba(26, 31, 46, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+}
+
+.filter-chip.active {
+  background: var(--chip-bg, rgba(59,130,246,0.2));
+  border-color: var(--chip-color, rgba(59,130,246,0.4));
+  color: var(--chip-color, #3b82f6);
+  font-weight: 600;
+}
+
+.chip-icon {
+  font-size: 11px;
+}
+
+.chip-label {
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .globe-filters {
+    padding: 8px 12px;
+  }
+
+  .filter-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-group {
+    flex-wrap: nowrap;
+  }
+}
