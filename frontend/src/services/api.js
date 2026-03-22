@@ -285,11 +285,11 @@ class ApiService {
   }
 
   async createLead(lead) {
-    return this.request('/leads', { method: 'POST', body: lead });
+    return this.request('/leads', { method: 'POST', body: JSON.parse(JSON.stringify(lead)) });
   }
 
   async updateLead(id, lead) {
-    return this.request(`/leads/${id}`, { method: 'PATCH', body: lead });
+    return this.request(`/leads/${id}`, { method: 'PATCH', body: JSON.parse(JSON.stringify(lead)) });
   }
 
   async getLeadAnalytics() {

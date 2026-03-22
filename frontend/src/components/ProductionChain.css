@@ -1,0 +1,171 @@
+.production-chain {
+  background: var(--bg-secondary, #1a1f2e);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color, rgba(255,255,255,0.06));
+}
+
+.chain-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chain-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chain-province {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.chain-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chain-stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+}
+
+.chain-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chain-stage-icon {
+  font-size: 12px;
+}
+
+.chain-stage-label {
+  font-size: 11px;
+  color: var(--text-secondary, #94a3b8);
+  flex: 1;
+}
+
+.chain-stage-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.chain-bar-track {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.chain-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chain-stage-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.chain-detail-key {
+  color: rgba(255,255,255,0.35);
+}
+
+.chain-detail-value {
+  color: rgba(255,255,255,0.6);
+}
+
+.chain-flow {
+  margin: 16px 0;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  overflow-x: auto;
+}
+
+.chain-flow-line {
+  display: flex;
+  align-items: center;
+  min-width: max-content;
+  justify-content: center;
+  gap: 0;
+}
+
+.chain-flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+
+.chain-flow-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color, #3b82f6);
+  box-shadow: 0 0 8px var(--color, #3b82f6);
+}
+
+.chain-flow-label {
+  font-size: 12px;
+}
+
+.chain-flow-arrow {
+  margin: 0 2px;
+  display: flex;
+  align-items: center;
+}
+
+.chain-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chain-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.chain-metric-icon {
+  font-size: 12px;
+}
+
+.chain-metric-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.chain-metric-label {
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

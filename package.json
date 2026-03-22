@@ -1,0 +1,10 @@
+{
+  "name": "ai-city-root",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build"
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0"
+  }
+}

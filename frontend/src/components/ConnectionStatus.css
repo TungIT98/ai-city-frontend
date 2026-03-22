@@ -1,0 +1,107 @@
+/* Connection Status Styles */
+.connection-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.connection-status.compact {
+  padding: 4px 8px;
+  background: transparent;
+  gap: 6px;
+}
+
+.connection-status.disconnected,
+.connection-status.error {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.connection-status.simulated {
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.status-label {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Live Metrics */
+.live-metrics {
+  display: flex;
+  gap: 16px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.metric-value {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.metric-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .connection-status {
+    padding: 6px 10px;
+  }
+
+  .live-metrics {
+    gap: 12px;
+  }
+
+  .metric-value {
+    font-size: 12px;
+  }
+}
