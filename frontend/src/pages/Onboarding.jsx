@@ -66,7 +66,7 @@ const Onboarding = () => {
     // Store onboarding data (in real app, would save to backend)
     localStorage.setItem('onboardingComplete', 'true');
     localStorage.setItem('companyProfile', JSON.stringify(formData));
-    navigate('/');
+    navigate('/dashboard');
   };
 
   const renderStepContent = () => {
