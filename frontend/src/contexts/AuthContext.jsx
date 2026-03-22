@@ -86,7 +86,7 @@ export function AuthProvider({ children }) {
       const response = await fetch(`${baseUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, workspace_name: workspaceName }),
+        body: JSON.stringify({ name, email, password, workspace: workspaceName }),
       });
 
       if (!response.ok) {
