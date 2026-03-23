@@ -76,7 +76,15 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      let message = error.message;
+      if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+        message = 'Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng.';
+      } else if (message.toLowerCase().includes('invalid') || message.toLowerCase().includes('incorrect') || message.toLowerCase().includes('wrong')) {
+        message = 'Email hoặc mật khẩu không đúng.';
+      } else if (message.toLowerCase().includes('not found') || message.toLowerCase().includes('exist')) {
+        message = 'Tài khoản không tồn tại. Vui lòng đăng ký.';
+      }
+      return { success: false, error: message };
     }
   }, []);
 
@@ -104,19 +112,27 @@ export function AuthProvider({ children }) {
 
       setToken(token);
       setUser({
-        id: userData.id || decoded?.user_id,
+        id: userData.id || decoded?.sub || decoded?.user_id,
         email: userData.email || decoded?.email,
-        name: userData.name || name,
-        role: userData.role || 'admin',
+        name: userData.name || decoded?.name || name,
+        role: userData.role || decoded?.role || 'admin',
         workspaceId: userData.workspace_id || decoded?.workspace_id,
       });
-      setWorkspace({ id: userData.workspace_id || decoded?.workspace_id, name: workspaceName || userData.workspace_name });
+      setWorkspace({ id: userData.workspace_id || decoded?.workspace_id, name: workspaceName || userData.workspace_name || decoded?.workspace_name });
       localStorage.setItem('token', token);
       if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      let message = error.message;
+      if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+        message = 'Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng.';
+      } else if (message.includes('duplicate') || message.includes('already exists')) {
+        message = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.';
+      } else if (message.toLowerCase().includes('password')) {
+        message = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      }
+      return { success: false, error: message };
     }
   }, []);
 

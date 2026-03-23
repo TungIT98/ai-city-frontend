@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Loader2, AlertCircle, User, Mail, Lock, Building2, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Loader2, AlertCircle, User, Mail, Lock, Building2, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -28,6 +29,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     try {
@@ -39,6 +41,11 @@ export default function Login() {
       }
 
       if (result.success) {
+        // Show brief success message before redirect
+        if (isRegister) {
+          setSuccess('Đăng ký thành công! Đang chuyển hướng...');
+          await new Promise(r => setTimeout(r, 800));
+        }
         navigate(from, { replace: true });
       } else {
         setError(result.error || 'Authentication failed. Please try again.');
@@ -123,6 +130,25 @@ export default function Login() {
           </div>
         )}
 
+        {/* Success Alert */}
+        {success && (
+          <div style={{
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            color: '#16a34a',
+            fontSize: '14px',
+          }}>
+            <CheckCircle2 size={16} />
+            {success}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {isRegister && (
@@ -132,7 +158,7 @@ export default function Login() {
                     Họ và tên
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <User size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: loading ? '#d1d5db' : '#9ca3af' }} />
                     <input
                       type="text"
                       name="name"
@@ -140,6 +166,7 @@ export default function Login() {
                       onChange={handleChange}
                       placeholder="Nguyễn Văn A"
                       required
+                      disabled={loading}
                       style={{
                         width: '100%',
                         padding: '12px 12px 12px 40px',
@@ -149,8 +176,10 @@ export default function Login() {
                         outline: 'none',
                         boxSizing: 'border-box',
                         transition: 'border-color 0.2s',
+                        background: loading ? '#f9fafb' : 'white',
+                        cursor: loading ? 'not-allowed' : 'text',
                       }}
-                      onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                      onFocus={(e) => { if (!loading) e.target.style.borderColor = '#667eea'; }}
                       onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     />
                   </div>
@@ -161,7 +190,7 @@ export default function Login() {
                     Tên Workspace
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <Building2 size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                    <Building2 size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: loading ? '#d1d5db' : '#9ca3af' }} />
                     <input
                       type="text"
                       name="workspaceName"
@@ -169,6 +198,7 @@ export default function Login() {
                       onChange={handleChange}
                       placeholder="Công ty ABC"
                       required
+                      disabled={loading}
                       style={{
                         width: '100%',
                         padding: '12px 12px 12px 40px',
@@ -178,8 +208,10 @@ export default function Login() {
                         outline: 'none',
                         boxSizing: 'border-box',
                         transition: 'border-color 0.2s',
+                        background: loading ? '#f9fafb' : 'white',
+                        cursor: loading ? 'not-allowed' : 'text',
                       }}
-                      onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                      onFocus={(e) => { if (!loading) e.target.style.borderColor = '#667eea'; }}
                       onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     />
                   </div>
@@ -192,7 +224,7 @@ export default function Login() {
                 Email
               </label>
               <div style={{ position: 'relative' }}>
-                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: loading ? '#d1d5db' : '#9ca3af' }} />
                 <input
                   type="email"
                   name="email"
@@ -200,6 +232,7 @@ export default function Login() {
                   onChange={handleChange}
                   placeholder="you@company.com"
                   required
+                  disabled={loading}
                   style={{
                     width: '100%',
                     padding: '12px 12px 12px 40px',
@@ -209,8 +242,10 @@ export default function Login() {
                     outline: 'none',
                     boxSizing: 'border-box',
                     transition: 'border-color 0.2s',
+                    background: loading ? '#f9fafb' : 'white',
+                    cursor: loading ? 'not-allowed' : 'text',
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onFocus={(e) => { if (!loading) e.target.style.borderColor = '#667eea'; }}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
               </div>
@@ -221,7 +256,7 @@ export default function Login() {
                 Mật khẩu
               </label>
               <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                <Lock size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: loading ? '#d1d5db' : '#9ca3af' }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
@@ -230,6 +265,7 @@ export default function Login() {
                   placeholder="••••••••"
                   required
                   minLength={6}
+                  disabled={loading}
                   style={{
                     width: '100%',
                     padding: '12px 40px 12px 40px',
@@ -239,8 +275,10 @@ export default function Login() {
                     outline: 'none',
                     boxSizing: 'border-box',
                     transition: 'border-color 0.2s',
+                    background: loading ? '#f9fafb' : 'white',
+                    cursor: loading ? 'not-allowed' : 'text',
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                  onFocus={(e) => { if (!loading) e.target.style.borderColor = '#667eea'; }}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
                 <button
@@ -303,7 +341,7 @@ export default function Login() {
           <p style={{ color: '#6b7280', fontSize: '14px' }}>
             {isRegister ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}{' '}
             <button
-              onClick={() => { setIsRegister(!isRegister); setError(''); setForm({ name: '', email: '', password: '', workspaceName: '' }); }}
+              onClick={() => { setIsRegister(!isRegister); setError(''); setSuccess(''); setForm({ name: '', email: '', password: '', workspaceName: '' }); }}
               style={{
                 background: 'none',
                 border: 'none',
