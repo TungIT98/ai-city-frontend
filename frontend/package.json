@@ -16,7 +16,6 @@
     "axios": "^1.13.6",
     "chart.js": "^4.5.1",
     "file-saver": "^2.0.5",
-    "globe.gl": "^2.45.1",
     "html2canvas": "^1.4.1",
     "i18next": "^25.10.4",
     "jspdf": "^4.2.1",
