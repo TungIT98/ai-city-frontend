@@ -1,10 +1,31 @@
 /**
- * AI Agents Page
- * Displays AI workforce agents with real AI-powered content generation
+ * AI Agents Page - AI Workforce Platform MVP
+ * Real agents with localStorage persistence and actual execution
  */
 import { useState, useEffect } from 'react';
-import api from '../services/api';
 import { generateContent, AGENT_CAPABILITIES } from '../services/aiGeneration';
+import {
+  loadAgentConfigs,
+  saveAgentConfig,
+  getAgentStatus,
+  setAgentStatus,
+  loadUsageStats,
+  addAgentLog,
+  loadAgentLogs,
+  loadAgentRuns,
+  saveAgentRun,
+  loadFAQs,
+  saveFAQ,
+  deleteFAQ,
+  getAgentStats,
+  loadGeneratedPosts,
+} from '../services/agentStore';
+import {
+  runSocialMediaAgent,
+  runContentWriterAgent,
+  runCustomerSupportAgent,
+  runDataEntryAgent,
+} from '../services/agentRunner';
 import './Agents.css';
 
 const AGENT_TYPES = [
@@ -66,7 +87,7 @@ function AgentRunPanel({ agent, onClose }) {
   const [generatedContent, setGeneratedContent] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
-  const [runs, setRuns] = useState(loadRunHistory());
+  const [runs, setRuns] = useState(() => loadAgentRuns(agent.id, 50));
   const [activeRunTab, setActiveRunTab] = useState(0);
 
   const capabilities = AGENT_CAPABILITIES[agent.id] || {};
@@ -90,22 +111,21 @@ function AgentRunPanel({ agent, onClose }) {
       });
       setGeneratedContent(content);
 
-      // Save to run history
-      const run = {
-        id: Date.now(),
+      // Save to run history using agent store
+      const creditsUsed = Math.floor(Math.random() * 10) + 5;
+      const run = saveAgentRun({
         agentId: agent.id,
         agentName: agent.name,
         contentType: selectedType.label,
         topic,
-        content,
+        result: content,
         tone,
         length,
-        timestamp: new Date().toISOString(),
-        creditsUsed: Math.floor(Math.random() * 10) + 5,
-      };
+        status: 'success',
+        creditsUsed,
+      });
       const newHistory = [run, ...runs].slice(0, 50);
       setRuns(newHistory);
-      saveRunHistory(newHistory);
     } catch (err) {
       setError('Generation failed. Please try again.');
       console.error(err);
@@ -289,14 +309,16 @@ function AgentRunPanel({ agent, onClose }) {
   );
 }
 
-function AgentCard({ agent, onRun }) {
+function AgentCard({ agent, onRun, onConfigure, onToggleStatus, onViewHistory, onViewLogs }) {
   const statusColors = {
     active: '#10b981',
     paused: '#f59e0b',
     error: '#ef4444',
   };
   const capabilities = AGENT_CAPABILITIES[agent.id];
-  const runCount = loadRunHistory().filter(r => r.agentId === agent.id).length;
+  const runCount = loadAgentRuns(agent.id, 100).length;
+  const stats = getAgentStats(agent.id);
+  const status = getAgentStatus(agent.id);
 
   return (
     <div className="agent-card" style={{ '--card-accent': agent.color }}>
@@ -306,6 +328,9 @@ function AgentCard({ agent, onRun }) {
           <h3>{agent.name}</h3>
           <span className="agent-type">{agent.tagline}</span>
         </div>
+        <span className="agent-status" style={{ backgroundColor: statusColors[status] }}>
+          {status}
+        </span>
       </div>
       <p className="agent-description">{agent.description}</p>
       <div className="agent-capability-tags">
@@ -318,15 +343,15 @@ function AgentCard({ agent, onRun }) {
       <div className="agent-stats">
         <div className="stat">
           <span className="stat-label">Runs</span>
-          <span className="stat-value">{runCount}</span>
+          <span className="stat-value">{stats.totalRuns}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Types</span>
-          <span className="stat-value">{capabilities?.types?.length || 0}</span>
+          <span className="stat-label">Success</span>
+          <span className="stat-value">{stats.successRate}%</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Status</span>
-          <span className="stat-value" style={{ color: '#10b981' }}>Ready</span>
+          <span className="stat-label">Credits</span>
+          <span className="stat-value">{stats.creditsUsed}</span>
         </div>
       </div>
       <div className="agent-actions">
@@ -335,8 +360,268 @@ function AgentCard({ agent, onRun }) {
           onClick={() => onRun(agent)}
           style={{ '--btn-color': agent.color }}
         >
-          ✨ Try Now
+          ✨ Run Now
         </button>
+        <button
+          className="btn-secondary"
+          onClick={() => onConfigure(agent)}
+          style={{ '--btn-color': agent.color }}
+        >
+          ⚙️ Config
+        </button>
+        <button
+          className={`btn-toggle ${status === 'active' ? 'active' : ''}`}
+          onClick={() => onToggleStatus(agent, status === 'active' ? 'paused' : 'active')}
+        >
+          {status === 'active' ? '⏸ Pause' : '▶️ Activate'}
+        </button>
+      </div>
+      <div className="agent-secondary-actions">
+        <button className="btn-link" onClick={() => onViewHistory(agent)}>📜 History ({stats.totalRuns})</button>
+        <button className="btn-link" onClick={() => onViewLogs(agent)}>📋 Logs</button>
+      </div>
+    </div>
+  );
+}
+
+// --- FAQ Manager Modal ---
+function FAQManagerModal({ onClose }) {
+  const [faqs, setFaqs] = useState([]);
+  const [form, setForm] = useState({ question: '', answer: '' });
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => { setFaqs(loadFAQs()); }, []);
+
+  const handleSave = () => {
+    if (!form.question || !form.answer) return;
+    const updated = saveFAQ(editingId ? { ...form, id: editingId } : form);
+    setFaqs(Array.isArray(updated) ? updated : loadFAQs());
+    setForm({ question: '', answer: '' });
+    setEditingId(null);
+  };
+
+  const handleEdit = (faq) => {
+    setForm({ question: faq.question, answer: faq.answer });
+    setEditingId(faq.id);
+  };
+
+  const handleDelete = (id) => {
+    const updated = deleteFAQ(id);
+    setFaqs(updated);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content faq-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+        <h2>FAQ Management — Customer Support Agent</h2>
+        <p style={{ color: '#6b7280', fontSize: '13px', marginTop: '-12px' }}>
+          Add FAQs to enable automated response suggestions
+        </p>
+        <div className="config-form">
+          <div className="form-group">
+            <label>Question</label>
+            <input type="text" placeholder="e.g., How do I reset my password?"
+              value={form.question} onChange={e => setForm({ ...form, question: e.target.value })} />
+          </div>
+          <div className="form-group">
+            <label>Answer</label>
+            <textarea rows={3} placeholder="e.g., Go to Settings > Security > Reset Password..."
+              value={form.answer} onChange={e => setForm({ ...form, answer: e.target.value })} />
+          </div>
+          <div className="modal-actions" style={{ marginTop: '8px' }}>
+            {editingId && (
+              <button className="btn-secondary" onClick={() => { setEditingId(null); setForm({ question: '', answer: '' }); }}>
+                Cancel
+              </button>
+            )}
+            <button className="btn-primary" onClick={handleSave} disabled={!form.question || !form.answer}>
+              {editingId ? 'Update FAQ' : 'Add FAQ'}
+            </button>
+          </div>
+        </div>
+        <div style={{ marginTop: '20px', maxHeight: '300px', overflowY: 'auto' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Existing FAQs ({faqs.length})</h3>
+          {faqs.map(faq => (
+            <div key={faq.id} style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px', marginTop: '8px', borderLeft: '3px solid #f59e0b' }}>
+              <div style={{ fontWeight: '500', color: '#111827', fontSize: '13px' }}>{faq.question}</div>
+              <div style={{ color: '#6b7280', fontSize: '12px', marginTop: '4px' }}>{faq.answer}</div>
+              <div style={{ marginTop: '6px' }}>
+                <button className="btn-link" onClick={() => handleEdit(faq)} style={{ fontSize: '12px' }}>Edit</button>
+                <button className="btn-link" onClick={() => handleDelete(faq.id)} style={{ fontSize: '12px' }}>Delete</button>
+              </div>
+            </div>
+          ))}
+          {faqs.length === 0 && (
+            <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', padding: '20px' }}>
+              No FAQs yet. Add some to enable automated responses.
+            </p>
+          )}
+        </div>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Agent Config Modal ---
+function AgentConfigModal({ agent, onClose }) {
+  const [config, setConfig] = useState(loadAgentConfigs()[agent.id] || {});
+
+  const handleSave = () => {
+    saveAgentConfig(agent.id, config);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <h2>Configure: {agent.name}</h2>
+        <div className="config-form">
+          <div className="form-group">
+            <label>Schedule</label>
+            <select value={config.schedule || 'manual'} onChange={e => setConfig({ ...config, schedule: e.target.value })}>
+              <option value="manual">Manual</option>
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Max Credits per Run</label>
+            <input type="number" value={config.maxCredits || 50}
+              onChange={e => setConfig({ ...config, maxCredits: parseInt(e.target.value) })} min="1" max="500" />
+          </div>
+          <div className="form-group">
+            <label>
+              <input type="checkbox" checked={config.notifications !== false}
+                onChange={e => setConfig({ ...config, notifications: e.target.checked })} />
+              Enable Notifications
+            </label>
+          </div>
+          <div className="form-group">
+            <label>Topic Preference (for social/content)</label>
+            <input type="text" placeholder="e.g., AI automation, Vietnam businesses"
+              value={config.topic || ''} onChange={e => setConfig({ ...config, topic: e.target.value })} />
+          </div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn-primary" onClick={handleSave}>Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Agent Logs Modal ---
+function AgentLogsModal({ agent, onClose }) {
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    const allLogs = loadAgentLogs(agent.id, 30);
+    setLogs(allLogs);
+  }, [agent.id]);
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content logs-modal" onClick={e => e.stopPropagation()}>
+        <h2>Logs — {agent.name}</h2>
+        {logs.length === 0 ? (
+          <p className="no-logs">No logs yet. Run the agent to see logs.</p>
+        ) : (
+          <div className="logs-list">
+            {logs.map(log => (
+              <div key={log.id} className={`log-item ${log.level}`}>
+                <span className="log-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                <span className={`log-level ${log.level}`}>{log.level}</span>
+                <span className="log-message">{log.message}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="modal-actions">
+          <button className="btn-primary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Agent Run History Modal ---
+function AgentHistoryModal({ agent, onClose }) {
+  const [runs, setRuns] = useState([]);
+
+  useEffect(() => {
+    setRuns(loadAgentRuns(agent.id, 20));
+  }, [agent.id]);
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content run-history-modal" onClick={e => e.stopPropagation()}>
+        <h2>Run History — {agent.name}</h2>
+        {runs.length === 0 ? (
+          <p className="no-runs">No runs yet. Run the agent to see history.</p>
+        ) : (
+          <div className="runs-list">
+            {runs.map(run => (
+              <div key={run.id} className={`run-item ${run.status === 'failed' ? 'failed' : ''}`}>
+                <div className="run-status">
+                  <span className={`status-badge ${run.status === 'success' ? 'success' : 'failed'}`}>
+                    {run.status === 'success' ? '✓' : '✕'}
+                  </span>
+                </div>
+                <div className="run-info">
+                  <span className="run-time">{new Date(run.createdAt).toLocaleString()}</span>
+                  <span>{run.creditsUsed} credits</span>
+                  {run.message && <span style={{ color: '#374151', fontSize: '12px' }}>{run.message}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="modal-actions">
+          <button className="btn-primary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Generated Posts Gallery ---
+function PostsGalleryModal({ onClose }) {
+  const posts = loadGeneratedPosts();
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '640px' }}>
+        <h2>Generated Social Posts</h2>
+        {posts.length === 0 ? (
+          <p style={{ color: '#6b7280', textAlign: 'center', padding: '24px' }}>
+            No posts generated yet. Run the Social Media agent to create posts.
+          </p>
+        ) : (
+          <div style={{ maxHeight: '500px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {posts.map(post => (
+              <div key={post.id} style={{ padding: '14px', background: '#f9fafb', borderRadius: '10px', borderLeft: `3px solid ${post.platform === 'linkedin' ? '#0077b5' : '#1877f2'}` }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '12px' }}>
+                  <span style={{ background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '10px', fontWeight: '500' }}>
+                    {post.platform}
+                  </span>
+                  <span style={{ color: '#9ca3af' }}>{post.topic}</span>
+                  <span style={{ color: '#9ca3af', marginLeft: 'auto' }}>{new Date(post.createdAt).toLocaleDateString()}</span>
+                </div>
+                <pre style={{ fontSize: '13px', lineHeight: '1.6', color: '#374151', whiteSpace: 'pre-wrap', margin: 0, maxHeight: '200px', overflowY: 'auto' }}>
+                  {post.posts}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Close</button>
+        </div>
       </div>
     </div>
   );
@@ -344,24 +629,42 @@ function AgentCard({ agent, onRun }) {
 
 function Agents() {
   const [runningAgent, setRunningAgent] = useState(null);
-  const [usage, setUsage] = useState({ totalCredits: 1000, usedCredits: 0, availableCredits: 1000 });
-  const allRuns = loadRunHistory();
-  const totalRuns = allRuns.length;
-  const activeAgents = AGENT_TYPES.length;
+  const [configuringAgent, setConfiguringAgent] = useState(null);
+  const [logsAgent, setLogsAgent] = useState(null);
+  const [historyAgent, setHistoryAgent] = useState(null);
+  const [showFAQ, setShowFAQ] = useState(false);
+  const [showPosts, setShowPosts] = useState(false);
+  const [usage, setUsage] = useState({ totalCredits: 1000, usedCredits: 0, availableCredits: 1000, runsCount: 0 });
 
   useEffect(() => {
-    // Calculate real usage from history
-    const used = allRuns.reduce((sum, r) => sum + (r.creditsUsed || 0), 0);
-    setUsage({
-      totalCredits: 1000,
-      usedCredits: Math.min(used, 1000),
-      availableCredits: Math.max(1000 - used, 0),
-    });
+    const stats = loadUsageStats();
+    setUsage(stats);
   }, []);
 
   const handleRunAgent = (agent) => {
     setRunningAgent(agent);
   };
+
+  const handleConfigureAgent = (agent) => {
+    setConfiguringAgent(agent);
+  };
+
+  const handleToggleStatus = (agent, newStatus) => {
+    setAgentStatus(agent.id, newStatus);
+    addAgentLog(agent.id, 'info', `Status changed to ${newStatus}`);
+    // Force re-render
+    setUsage(loadUsageStats());
+  };
+
+  const handleViewHistory = (agent) => {
+    setHistoryAgent(agent);
+  };
+
+  const handleViewLogs = (agent) => {
+    setLogsAgent(agent);
+  };
+
+  const activeAgents = AGENT_TYPES.length;
 
   return (
     <div className="agents-page">
@@ -398,7 +701,7 @@ function Agents() {
           <span className="summary-icon">🤖</span>
           <div className="summary-info">
             <span className="summary-value">{activeAgents}</span>
-            <span className="summary-label">Available Agents</span>
+            <span className="summary-label">AI Agents</span>
           </div>
         </div>
         <div className="summary-card">
@@ -411,15 +714,22 @@ function Agents() {
         <div className="summary-card">
           <span className="summary-icon">🔄</span>
           <div className="summary-info">
-            <span className="summary-value">{totalRuns}</span>
-            <span className="summary-label">Total Generations</span>
+            <span className="summary-value">{usage.runsCount}</span>
+            <span className="summary-label">Total Runs</span>
           </div>
         </div>
-        <div className="summary-card">
-          <span className="summary-icon">⚡</span>
+        <div className="summary-card" onClick={() => setShowFAQ(true)} style={{ cursor: 'pointer' }} title="Manage FAQs">
+          <span className="summary-icon">❓</span>
           <div className="summary-info">
-            <span className="summary-value">Real AI</span>
-            <span className="summary-label">Powered Content</span>
+            <span className="summary-value">{loadFAQs().length}</span>
+            <span className="summary-label">FAQs</span>
+          </div>
+        </div>
+        <div className="summary-card" onClick={() => setShowPosts(true)} style={{ cursor: 'pointer' }} title="View generated posts">
+          <span className="summary-icon">📝</span>
+          <div className="summary-info">
+            <span className="summary-value">{loadGeneratedPosts().length}</span>
+            <span className="summary-label">Posts Generated</span>
           </div>
         </div>
       </div>
@@ -435,6 +745,10 @@ function Agents() {
             key={agent.id}
             agent={agent}
             onRun={handleRunAgent}
+            onConfigure={handleConfigureAgent}
+            onToggleStatus={handleToggleStatus}
+            onViewHistory={handleViewHistory}
+            onViewLogs={handleViewLogs}
           />
         ))}
       </div>
@@ -446,6 +760,36 @@ function Agents() {
           onClose={() => setRunningAgent(null)}
         />
       )}
+
+      {/* Config Modal */}
+      {configuringAgent && (
+        <AgentConfigModal
+          agent={configuringAgent}
+          onClose={() => setConfiguringAgent(null)}
+        />
+      )}
+
+      {/* Logs Modal */}
+      {logsAgent && (
+        <AgentLogsModal
+          agent={logsAgent}
+          onClose={() => setLogsAgent(null)}
+        />
+      )}
+
+      {/* History Modal */}
+      {historyAgent && (
+        <AgentHistoryModal
+          agent={historyAgent}
+          onClose={() => setHistoryAgent(null)}
+        />
+      )}
+
+      {/* FAQ Manager */}
+      {showFAQ && <FAQManagerModal onClose={() => setShowFAQ(false)} />}
+
+      {/* Posts Gallery */}
+      {showPosts && <PostsGalleryModal onClose={() => setShowPosts(false)} />}
     </div>
   );
 }
