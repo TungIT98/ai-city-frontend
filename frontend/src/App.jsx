@@ -75,6 +75,7 @@ function App() {
             <Route path="/landing" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Login />} />
+            <Route path="/signup" element={<Login />} />
             <Route path="/agent-marketplace" element={<AgentMarketplace />} />
             <Route
               path="/agent-dashboard"

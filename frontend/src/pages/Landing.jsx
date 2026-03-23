@@ -56,6 +56,20 @@ function Landing() {
 
   return (
     <div className="landing">
+      {/* Navigation */}
+      <nav className="landing-nav">
+        <div className="nav-brand">
+          <h1>AI City</h1>
+        </div>
+        <div className="nav-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#book-demo">Book Demo</a>
+          <Link to="/login" className="nav-btn nav-btn-secondary">Login</Link>
+          <Link to="/signup" className="nav-btn nav-btn-primary">Register</Link>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
@@ -64,9 +78,9 @@ function Landing() {
             Enterprise-grade AI infrastructure. Complete data sovereignty. Local deployment.
           </p>
           <div className="hero-buttons">
-            <button className="btn btn-primary btn-large" onClick={handleGetStarted}>
+            <Link to="/signup" className="btn btn-primary btn-large">
               Get Started Free
-            </button>
+            </Link>
             <button className="btn btn-secondary btn-large" onClick={handleContactSales}>
               Contact Sales
             </button>
@@ -353,11 +367,11 @@ function Landing() {
         <h2>Ready to Get Started?</h2>
         <p>Join Vietnamese businesses already using AI City to power their AI infrastructure.</p>
         <div className="cta-buttons">
-          <a href="#book-demo" className="btn btn-primary btn-large">
-            Book a Free Demo
-          </a>
-          <Link to="/dashboard" className="btn btn-link">
-            View Demo Dashboard →
+          <Link to="/signup" className="btn btn-primary btn-large">
+            Get Started Free
+          </Link>
+          <Link to="/login" className="btn btn-link">
+            Already have an account? Login →
           </Link>
         </div>
       </section>
