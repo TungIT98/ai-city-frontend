@@ -7,12 +7,14 @@ import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Doughnut, Line } from 'react-chartjs-2';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user, workspace } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [health, setHealth] = useState({});
@@ -153,8 +155,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard">
       <div className="page-header">
-        <h2>Dashboard</h2>
-        <p>AI City performance overview</p>
+        <h2>Xin chào, {user?.name || 'User'}!</h2>
+        <p>{workspace?.name ? `${workspace.name} — ` : ''}AI City performance overview</p>
       </div>
 
       {/* Stats Grid */}
