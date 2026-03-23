@@ -3,6 +3,7 @@
  * Main marketing page with product info, features, and pricing
  */
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import './Landing.css';
 
 function Landing() {
@@ -12,6 +13,45 @@ function Landing() {
 
   const handleContactSales = () => {
     window.location.href = 'mailto:contact@ai-city.dev';
+  };
+
+  const [formData, setFormData] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    employees: '',
+    message: '',
+  });
+  const [formStatus, setFormStatus] = useState('idle'); // idle | submitting | success | error
+
+  const handleFormChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormStatus('submitting');
+    try {
+      const res = await fetch('https://formspree.io/f/xwpkzvgj', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        setFormStatus('success');
+        setFormData({ name: '', company: '', email: '', phone: '', employees: '', message: '' });
+      } else {
+        setFormStatus('error');
+      }
+    } catch {
+      setFormStatus('error');
+    }
+  };
+
+  const handleWhatsApp = () => {
+    const msg = encodeURIComponent(`Hi AI City, I would like to book a demo.\n\nName: ${formData.name}\nCompany: ${formData.company}\nEmail: ${formData.email}\nPhone: ${formData.phone}`);
+    window.open(`https://wa.me/84912345678?text=${msg}`, '_blank');
   };
 
   return (
@@ -177,14 +217,145 @@ function Landing() {
         </div>
       </section>
 
+      {/* Book a Demo Section */}
+      <section className="book-demo" id="book-demo">
+        <div className="book-demo-container">
+          <div className="book-demo-info">
+            <h2>Book a Free Demo</h2>
+            <p className="section-subtitle">
+              See AI City in action. Our team will set up a personalized demo tailored to your business needs.
+            </p>
+            <ul className="book-demo-benefits">
+              <li>✓ Personalized 30-minute walkthrough</li>
+              <li>✓ Custom integration consultation</li>
+              <li>✓ ROI analysis for your use case</li>
+              <li>✓ No commitment required</li>
+            </ul>
+          </div>
+          <div className="book-demo-form-wrapper">
+            {formStatus === 'success' ? (
+              <div className="form-success">
+                <div className="success-icon">✓</div>
+                <h3>Thank you!</h3>
+                <p>We've received your demo request. Our team will contact you within 24 hours.</p>
+                <button className="btn btn-primary" onClick={() => setFormStatus('idle')}>
+                  Submit Another Request
+                </button>
+              </div>
+            ) : (
+              <form className="book-demo-form" onSubmit={handleFormSubmit}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="name">Full Name *</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      placeholder="Nguyễn Văn A"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="company">Company *</label>
+                    <input
+                      type="text"
+                      id="company"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleFormChange}
+                      placeholder="Công ty ABC"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="email">Email *</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      placeholder="contact@company.com"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone *</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleFormChange}
+                      placeholder="0xx xxx xxxx"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="employees">Number of Employees</label>
+                  <select
+                    id="employees"
+                    name="employees"
+                    value={formData.employees}
+                    onChange={handleFormChange}
+                  >
+                    <option value="">Select range</option>
+                    <option value="1-10">1-10</option>
+                    <option value="11-50">11-50</option>
+                    <option value="51-200">51-200</option>
+                    <option value="201-500">201-500</option>
+                    <option value="500+">500+</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="message">Message (optional)</label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleFormChange}
+                    placeholder="Tell us about your AI needs..."
+                    rows={3}
+                  />
+                </div>
+                {formStatus === 'error' && (
+                  <p className="form-error">Something went wrong. Please try again or contact us directly.</p>
+                )}
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-large"
+                    disabled={formStatus === 'submitting'}
+                  >
+                    {formStatus === 'submitting' ? 'Sending...' : 'Book Demo'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-whatsapp"
+                    onClick={handleWhatsApp}
+                  >
+                    <span>📱</span> Chat on WhatsApp
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="cta">
         <h2>Ready to Get Started?</h2>
         <p>Join Vietnamese businesses already using AI City to power their AI infrastructure.</p>
         <div className="cta-buttons">
-          <button className="btn btn-primary btn-large" onClick={handleGetStarted}>
-            Start Your Free Trial
-          </button>
+          <a href="#book-demo" className="btn btn-primary btn-large">
+            Book a Free Demo
+          </a>
           <Link to="/dashboard" className="btn btn-link">
             View Demo Dashboard →
           </Link>
@@ -202,7 +373,7 @@ function Landing() {
             <div>
               <h5>Product</h5>
               <a href="#pricing">Pricing</a>
-              <a href="/dashboard">Dashboard Demo</a>
+              <a href="#book-demo">Book Demo</a>
               <a href="/onboarding">Get Started</a>
             </div>
             <div>
