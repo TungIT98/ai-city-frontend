@@ -98,8 +98,16 @@ export function AuthProvider({ children }) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Registration failed');
+        let errorMsg = 'Registration failed';
+        try {
+          const error = await response.json();
+          errorMsg = error.detail || error.message || errorMsg;
+        } catch { /* non-JSON response */ }
+        // Handle HTTP status codes
+        if (response.status === 409) errorMsg = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.';
+        else if (response.status === 400) errorMsg = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.';
+        else if (response.status >= 500) errorMsg = 'Máy chủ đang bận. Vui lòng thử lại sau.';
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
@@ -125,11 +133,11 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       let message = error.message;
-      if (message.includes('Failed to fetch') || message.includes('NetworkError')) {
+      if (message.includes('Failed to fetch') || message.includes('NetworkError') || message.includes('network')) {
         message = 'Không thể kết nối máy chủ. Vui lòng kiểm tra kết nối mạng.';
-      } else if (message.includes('duplicate') || message.includes('already exists')) {
+      } else if (message.includes('duplicate') || message.includes('already exists') || message.includes('409')) {
         message = 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc sử dụng email khác.';
-      } else if (message.toLowerCase().includes('password')) {
+      } else if (message.toLowerCase().includes('password') || message.includes('400')) {
         message = 'Mật khẩu phải có ít nhất 6 ký tự.';
       }
       return { success: false, error: message };
