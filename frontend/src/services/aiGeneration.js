@@ -239,12 +239,15 @@ Write it now:`;
     if (result && result.trim().length > 50) {
       return result.trim();
     }
+    throw new Error('Generated output too short, please try again.');
   } catch (err) {
-    console.warn('HuggingFace API unavailable, using template:', err.message);
+    // Re-throw API errors so the UI shows a proper error message
+    throw new Error(
+      err.message.includes('timed out')
+        ? 'AI generation timed out. The model may still be loading on HuggingFace. Please try again in a moment.'
+        : 'AI generation unavailable. Add your VITE_HF_TOKEN to .env to enable real AI content generation.'
+    );
   }
-
-  // Fallback to template-based generation
-  return CONTENT_TEMPLATES[type] || `Generated content for ${type}. ${topic || ''}`;
 }
 
 // Agent capabilities metadata

@@ -78,9 +78,7 @@ Format as a numbered list.`;
     posts = result.text;
     addAgentLog('social-media', 'info', `Generated ${count} posts using ${result.provider}`);
   } else {
-    // Template-based fallback
-    posts = generateSocialPostsTemplate(topic, platform, count);
-    addAgentLog('social-media', 'info', `Generated ${count} posts using templates`);
+    throw new Error('AI generation unavailable. Configure VITE_OPENAI_API_KEY or run Ollama locally to enable real content generation.');
   }
 
   saveGeneratedPost({
@@ -148,8 +146,7 @@ Vary the tone: one benefit-focused, one fear-of-missing-out, one social proof.`,
     content = result.text;
     addAgentLog('content-writer', 'info', `Generated ${type} using ${result.provider}`);
   } else {
-    content = generateContentTemplate(type, subject, industry);
-    addAgentLog('content-writer', 'info', `Generated ${type} using templates`);
+    throw new Error('AI generation unavailable. Configure VITE_OPENAI_API_KEY or run Ollama locally to enable real content generation.');
   }
 
   saveTemplate({
@@ -317,30 +314,6 @@ function getCategoryResponse(category) {
     general: 'Thank you for contacting us. We\'ll get back to you as soon as possible.',
   };
   return responses[category] || responses.general;
-}
-
-function generateSupportTemplates(faqs) {
-  const categories = [
-    { id: 'billing', label: 'Billing & Payments', responses: [
-      'Thank you for your billing inquiry. Our finance team will review and respond within 24 hours.',
-      'I\'ve processed your refund request. Please allow 5-7 business days for the amount to reflect in your account.',
-    ]},
-    { id: 'technical', label: 'Technical Support', responses: [
-      'We\'ve identified the issue and our team is working on a fix. Expected resolution: 2-4 hours.',
-      'Could you please provide more details about the error message you\'re seeing?',
-    ]},
-    { id: 'general', label: 'General', responses: [
-      'Thank you for reaching out! We\'re happy to help. Is there anything specific I can assist you with?',
-      'We appreciate your feedback and are constantly working to improve our service.',
-    ]},
-  ];
-
-  return {
-    status: 'success',
-    result: { categories, faqCount: faqs.length },
-    creditsUsed: 6,
-    message: `Generated ${categories.length} response template categories`,
-  };
 }
 
 // --- Data Entry Agent ---
@@ -530,138 +503,4 @@ async function validateLeadData() {
     return { status: 'error', message: 'Failed to load leads for validation' };
   }
 }
-
-// --- Template generators (fallback when LLM unavailable) ---
-function generateSocialPostsTemplate(topic, platform, count) {
-  const templates = {
-    linkedin: [
-      `🚀 "${topic}" is reshaping how businesses operate in 2026.
-
-Companies embracing AI-powered automation are seeing 3-5x productivity gains.
-
-The question isn't IF you should adopt these tools — it's HOW FAST you can implement them.
-
-What's your biggest challenge with AI adoption? 👇
-
-#AI #Automation #Productivity #${topic.replace(/\s+/g, '')}`,
-      `📊 Data from 500+ companies shows: teams using AI agents complete tasks 60% faster.
-
-"${topic}" isn't just a buzzword — it's a competitive advantage.
-
-We've helped 200+ businesses implement AI workflows. Here's what we learned:
-
-→ Start small, iterate fast
-→ Focus on repetitive tasks first
-→ Measure everything
-
-Ready to transform your operations? Let's talk.
-
-#${topic.replace(/\s+/g, '')} #AI #Business`,
-      `💡 The biggest misconception about "${topic}":
-
-"You need a big team to implement AI."
-
-Reality: Our smallest client has 3 employees and automated 80% of their workflow.
-
-AI doesn't replace humans — it amplifies them.
-
-What's one task you'd automate first if you could?
-
-#AI #Automation #Entrepreneurs #${topic.replace(/\s+/g, '')}`,
-    ],
-    facebook: [
-      `🎉 Bạn đã thử "${topic}" chưa?
-
-Đây là cách doanh nghiệp Việt Nam đang tăng 300% năng suất với AI!
-
-👉 Comment "AI" để nhận tài liệu miễn phí!`,
-      `🔥 "${topic}" - Xu hướng không thể bỏ qua trong 2026!
-
-📈 85% doanh nghiệp top đầu đã áp dụng. Bạn còn chờ gì?
-
-💬 Chia sẻ suy nghĩ của bạn bên dưới!`,
-    ],
-    twitter: [
-      `${topic} tip: Don't wait for perfect. Ship fast, learn faster. The best AI implementations start with a single repetitive task.`,
-      `Hot take: "${topic}" will separate winning companies from the rest in 2026. Not because of the tech, but because of adoption speed.`,
-      `The "${topic}" ROI is real. Our clients avg 4.2x productivity gain in 90 days. What's your biggest bottleneck?`,
-    ],
-  };
-
-  const platformTemplates = templates[platform] || templates.linkedin;
-  return platformTemplates.slice(0, count).map((post, i) => `${i + 1}. ${post}`).join('\n\n');
-}
-
-function generateContentTemplate(type, subject, industry) {
-  const templates = {
-    email: `# ${subject}
-
----
-
-Hi [Name],
-
-I noticed ${industry} companies are increasingly focused on [problem]. We've helped similar businesses achieve [result].
-
-Here's what one client said:
-> "We reduced manual work by 70% in just 30 days." — [Testimonial]
-
-Would a 15-minute call work to explore if this is a fit for your team?
-
-Best,
-[Your Name]
-
----
-
-P.S. We're offering a free workflow audit for qualified companies this quarter.`,
-    blog: `# ${subject}: A Practical Guide for ${industry} Companies
-
-## Introduction
-The ${industry} sector is evolving rapidly. Companies that embrace automation are seeing unprecedented efficiency gains.
-
-## Key Sections
-
-### 1. Understanding the Challenge
-Most ${industry} businesses face [problem]. This costs an average of [cost] hours per week.
-
-### 2. The Solution: AI-Powered Workflows
-By automating repetitive tasks, teams can focus on high-value work.
-
-### 3. Implementation Steps
-- Step 1: Audit current workflows
-- Step 2: Identify automation opportunities
-- Step 3: Start with one pilot process
-- Step 4: Measure and iterate
-
-### 4. Results You Can Expect
-Companies following this framework typically see 40-60% efficiency gains within 60 days.
-
-## Conclusion
-The time to act is now. Book a free consultation to see how we can help your ${industry} business.
-
----
-
-*Meta description: A practical guide for ${industry} companies implementing AI automation. Learn the steps, avoid common pitfalls, and achieve results in 60 days.*`,
-    ad: `# Ad Variations for "${subject}"
-
-**Variant A — Benefit-Focused:**
-Headline: Save 10+ Hours/Week on Repetitive Tasks
-Description: AI automation for ${industry}. No coding required. See results in 30 days.
-CTA: Start Free Trial
-
----
-
-**Variant B — Social Proof:**
-Headline: 500+ ${industry} Companies Already Use Us
-Description: Join growing businesses saving 10+ hours weekly with AI.
-CTA: See Case Studies
-
----
-
-**Variant C — FOMO:**
-Headline: Your Competitors Are Already Automating
-Description: Don't fall behind. AI tools for ${industry} — easy setup, instant results.
-CTA: Get Started Free`,
-  };
-
-  return templates[type] || templates.email;
 }

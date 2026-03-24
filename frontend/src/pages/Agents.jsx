@@ -20,12 +20,6 @@ import {
   getAgentStats,
   loadGeneratedPosts,
 } from '../services/agentStore';
-import {
-  runSocialMediaAgent,
-  runContentWriterAgent,
-  runCustomerSupportAgent,
-  runDataEntryAgent,
-} from '../services/agentRunner';
 import './Agents.css';
 
 const AGENT_TYPES = [
