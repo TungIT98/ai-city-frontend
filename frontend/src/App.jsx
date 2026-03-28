@@ -49,6 +49,8 @@ const CustomizeDashboard = lazy(() => import('./pages/CustomizeDashboard'));
 const Admin = lazy(() => import('./pages/Admin'));
 const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
 const Payment = lazy(() => import('./pages/Payment'));
+const Terms = lazy(() => import('./pages/terms'));
+const Privacy = lazy(() => import('./pages/privacy'));
 
 function PageLoader() {
   return (
@@ -205,6 +207,8 @@ function App() {
               path="/payment"
               element={<ProtectedRoute><Layout><Payment /></Layout></ProtectedRoute>}
             />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
           </Suspense>
         </BrowserRouter>
